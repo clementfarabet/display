@@ -74,7 +74,17 @@ function M.image(img, opts)
   end
 
   -- Save image and encode to base64
-  local buffer = image.saveToString(img, 100)
+  local buffer
+  if image.saveToString then
+     buffer = image.saveToString(img, 100)
+  else
+     local tf = os.tmpname()
+     image.saveJPG(tf, img)
+     local f = io.open(tf)
+     buffer = f:read('*all')
+     f:close()
+     os.remove(tf)
+  end
   local imgdata = 'data:image/jpg;base64,' .. mime.b64(buffer)
 
   -- Send image:
